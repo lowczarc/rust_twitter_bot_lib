@@ -1,0 +1,10 @@
+[package]
+name = "twitter_bot_rust"
+version = "0.1.0"
+authors = ["Lancelot OWCZARCZAK <lowczarc@student.42.fr>"]
+edition = "2018"
+
+[dependencies]
+oauthcli = { git = "https://github.com/lowczarc/rust-oauthcli" }
+url = "1.7.2"
+reqwest = "0.9.15"
