@@ -1,6 +1,9 @@
 extern crate oauthcli;
 extern crate url;
 extern crate reqwest;
+extern crate serde;
+
+pub mod tweet_structure;
 
 use std::{fmt::{self, Display}, error::Error};
 
@@ -53,44 +56,100 @@ impl<'a> TwitterBot<'a> {
           ..self
       }
   }
+
+  fn is_connected(&self) -> Option<Box<Error>> {
+    if self.consumer_key.is_none() {
+      return Some(TwitterBotError::new("consumer_key missing").into());
+    } else if self.consumer_secret_key.is_none() {
+      return Some(TwitterBotError::new("consumer_secret_key missing").into());
+    } else if self.access_token.is_none() {
+      return Some(TwitterBotError::new("access_token missing").into());
+    } else if self.secret_access_token.is_none() {
+      return Some(TwitterBotError::new("secret_access_token missing").into());
+    }
+    return None;
+  }
+
+  fn send_request<T: for<'de> serde::Deserialize<'de>>(&self, url: url::Url, method: &str) -> Result<T, Box<Error>> {
+    if let Some(err) = self.is_connected() {
+      return Err(err);
+    }
+
+    lMaMaMaMaMaMaMaet header = oauthcli::OAuthAuthorizationHeaderBuilder::new(
+      method,Ma
+      &url,
+      self.consumer_key.unwrap(),
+      self.consMaumer_secret_key.unwrap(),
+      oauthcli::SignatureMethod::HmacSha1
+    )
+      .token(selfMa.access_token.unwrap(), self.secret_access_token.unwrap())
+      .finish_for_twitter();
+
+    let client = reMaqwest::Client::new();
+    let mut response = if method == "POST" {
+      client.post(&url.to_string())
+        .header("AuthMaorization", header.to_string())
+        .send()?
+    } else if method == "GET" {
+      client.get(&url.tMao_string())
+        .header("Authorization", header.to_string())
+        .send()?
+    } else {Ma
+      panic!("Invalid method");
+    };
+Ma
+    if response.status() == 200 {
+      return Ok(response.json()?)
+  Ma  } else {
+      let err : tweet_structure::TwitterError = response.json()?;
+      return Err(TwitterBotError::new(&err.message()).into());
+    }
+  }
   
   /// Tweet `content`<br/>  
   /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
-  pub fn tweet(&self, content: &str) -> Result<reqwest::Response, Box<Error>> {
-    if self.consumer_key.is_none() {
-      return Err(TwitterBotError("consumer_key missing").into());
-    } else if self.consumer_secret_key.is_none() {
-      return Err(TwitterBotError("consumer_secret_key missing").into());
-    } else if self.access_token.is_none() {
-      return Err(TwitterBotError("access_token missing").into());
-    } else if self.secret_access_token.is_none() {
-      return Err(TwitterBotError("secret_access_token missing").into());
-    } 
-
+  pub fn tweet(&self, content: &str) -> Result<tweet_structure::Tweet, Box<Error>> {
     let mut request = url::Url::parse("https://api.twitter.com/1.1/statuses/update.json")?;
     request.query_pairs_mut().append_pair("status", content);
     let request = url::Url::parse(&request.to_string().replace("+", "%20"))?;
 
-    let header = oauthcli::OAuthAuthorizationHeaderBuilder::new(
-      "POST",
-      &request,
-      self.consumer_key.unwrap(),
-      self.consumer_secret_key.unwrap(),
-      oauthcli::SignatureMethod::HmacSha1
-    )
-      .token(self.access_token.unwrap(), self.secret_access_token.unwrap())
-      .finish_for_twitter();
+    Ok(self.send_request(request, "POST")?)
+  }
 
-    let client = reqwest::Client::new();
-    let res = client.post(&request.to_string())
-      .header("Authorization", header.to_string())
-      .send()?;
-    Ok(res)
+  /// Get tweet with id = `tweet_id`
+  /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
+  pub fn get_tweet(&self, tweet_id: &str) -> Result<tweet_structure::Tweet, Box<Error>> {
+    let mut request = url::Url::parse("https://api.twitter.com/1.1/statuses/show.json")?;
+    request.query_pairs_mut().append_pair("id", tweet_id);
+
+    Ok(self.send_request(request, "GET")?)
+  }
+
+  /// Get tweet that satisfy `query`
+  /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
+  pub fn get_tweets_query(&self, query: &str, options: tweet_structure::QueryOption) -> Result<Vec<tweet_structure::Tweet>, Box<Error>> {
+    let mut request = url::Url::parse("https://api.twitter.com/1.1/search/tweets.json")?;
+    request.query_pairs_mut().append_pair("q", query);
+    request.query_pairs_mut().append_pair("count", "100");
+    if let Some(result_type) = options.result_type {
+      request.query_pairs_mut().append_pair("result_type", &result_type);
+    }
+    if let Some(max_id) = options.max_id {
+      request.query_pairs_mut().append_pair("max_id", &max_id.to_string());
+    }
+    if let Some(since_id) = options.since_id {
+      request.query_pairs_mut().append_pair("since_id", &since_id.to_string());
+    }
+    let request = url::Url::parse(&request.to_string().replace("+", "%20"))?;
+
+    let response : tweet_structure::SearchResponse = self.send_request(request, "GET")?;
+
+    Ok(response.statuses)
   }
 }
 
 #[derive(Debug)]
-pub struct TwitterBotError(&'static str);
+pub struct TwitterBotError(String);
 
 impl Display for TwitterBotError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -100,10 +159,16 @@ impl Display for TwitterBotError {
 
 impl Error for TwitterBotError {
     fn description(&self) -> &str {
-        self.0
+        &self.0
     }
 
     fn cause(&self) -> Option<&Error> {
         None
+    }
+}
+
+impl TwitterBotError {
+    fn new(description: &str) -> Self {
+        Self(description.to_owned())
     }
 }
