@@ -128,7 +128,7 @@ impl<'a> TwitterBot<'a> {
         Ok(self.send_request(request, "POST")?)
     }
 
-    /// Get tweet with id = `tweet_id`
+    /// Get tweet with id = `tweet_id`<br/>  
     /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
     pub fn get_tweet(&self, tweet_id: &str) -> Result<tweet_structure::Tweet, Box<Error>> {
         let mut request = url::Url::parse("https://api.twitter.com/1.1/statuses/show.json")?;
@@ -137,7 +137,7 @@ impl<'a> TwitterBot<'a> {
         Ok(self.send_request(request, "GET")?)
     }
 
-    /// Get tweet that satisfy `query`
+    /// Get tweet that satisfy `query`<br/>  
     /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
     pub fn get_tweets_query(
         &self,
