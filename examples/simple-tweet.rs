@@ -1,4 +1,4 @@
-use twitter_bot_rust::*;
+use rust_twitter_bot_lib::*;
 
 fn main() {
   let example_bot = TwitterBot::new()
