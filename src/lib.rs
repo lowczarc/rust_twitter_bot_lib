@@ -8,7 +8,10 @@ pub mod tweet_structure;
 use std::{
     error::Error,
     fmt::{self, Display},
+    path::Path,
 };
+
+use reqwest::multipart;
 
 #[derive(Default)]
 pub struct TwitterBot<'a> {
@@ -118,11 +121,59 @@ impl<'a> TwitterBot<'a> {
         }
     }
 
+    /// Create a media from a file<br/>
+    /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
+    pub fn upload_file(&self, path: &Path) -> Result<u64, Box<Error>> {
+        if let Some(err) = self.is_connected() {
+            return Err(err);
+        }
+
+        let header = oauthcli::OAuthAuthorizationHeaderBuilder::new(
+            "POST",
+            &url::Url::parse("https://upload.twitter.com/1.1/media/upload.json")?,
+            self.consumer_key.unwrap(),
+            self.consumer_secret_key.unwrap(),
+            oauthcli::SignatureMethod::HmacSha1,
+        )
+        .token(
+            self.access_token.unwrap(),
+            self.secret_access_token.unwrap(),
+        )
+        .finish_for_twitter();
+
+        let form = multipart::Form::new().part("media", multipart::Part::file(path)?);
+
+        let client = reqwest::Client::new();
+
+        let mut response = client
+            .post("https://upload.twitter.com/1.1/media/upload.json")
+            .header("Authorization", header.to_string())
+            .multipart(form)
+            .send()?;
+
+        if response.status() == 200 {
+            let res: tweet_structure::Media = response.json()?;
+            return Ok(res.media_id);
+        } else {
+            let err: tweet_structure::TwitterError = response.json()?;
+            return Err(TwitterBotError::new(&err.message()).into());
+        }
+    }
+
     /// Tweet `content`<br/>  
     /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
-    pub fn tweet(&self, content: &str) -> Result<tweet_structure::Tweet, Box<Error>> {
+    pub fn tweet(
+        &self,
+        content: &str,
+        media_id: Option<u64>,
+    ) -> Result<tweet_structure::Tweet, Box<Error>> {
         let mut request = url::Url::parse("https://api.twitter.com/1.1/statuses/update.json")?;
         request.query_pairs_mut().append_pair("status", content);
+        if let Some(media_id) = media_id {
+            request
+                .query_pairs_mut()
+                .append_pair("media_ids", &media_id.to_string());
+        }
         let request = url::Url::parse(&request.to_string().replace("+", "%20"))?;
 
         Ok(self.send_request(request, "POST")?)

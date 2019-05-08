@@ -80,6 +80,11 @@ impl User {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct Media {
+    pub media_id: u64,
+}
+
+#[derive(Serialize, Deserialize)]
 struct Errors {
     code: i64,
     message: String,
