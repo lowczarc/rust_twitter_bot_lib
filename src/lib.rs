@@ -12,16 +12,17 @@ use std::{
 };
 
 use reqwest::multipart;
+use serde::{Deserialize, Serialize};
 
-#[derive(Default)]
-pub struct TwitterBot<'a> {
-    consumer_key: Option<&'a str>,
-    consumer_secret_key: Option<&'a str>,
-    access_token: Option<&'a str>,
-    secret_access_token: Option<&'a str>,
+#[derive(Default, Serialize, Deserialize)]
+pub struct TwitterBot {
+    consumer_key: Option<String>,
+    consumer_secret_key: Option<String>,
+    access_token: Option<String>,
+    secret_access_token: Option<String>,
 }
 
-impl<'a> TwitterBot<'a> {
+impl TwitterBot {
     /// Creates a new Empty `TwitterBot`
     pub fn new() -> Self {
         TwitterBot::default()
@@ -29,36 +30,36 @@ impl<'a> TwitterBot<'a> {
 
     /// Add your `consumer_key`<br/>  
     /// Get it in your [Twitter App Dashboard](https://developer.twitter.com/en/apps/)
-    pub fn consumer_key(self, consumer_key: &'a str) -> Self {
+    pub fn consumer_key(self, consumer_key: &str) -> Self {
         Self {
-            consumer_key: Some(consumer_key.clone()),
+            consumer_key: Some(consumer_key.to_owned()),
             ..self
         }
     }
 
     /// Add your `consumer_secret_key`<br/>  
     /// Get it in your [Twitter App Dashboard](https://developer.twitter.com/en/apps/)
-    pub fn consumer_secret_key(self, consumer_secret_key: &'a str) -> Self {
+    pub fn consumer_secret_key(self, consumer_secret_key: &str) -> Self {
         Self {
-            consumer_secret_key: Some(consumer_secret_key.clone()),
+            consumer_secret_key: Some(consumer_secret_key.to_owned()),
             ..self
         }
     }
 
     /// Add your `access_token`<br/>  
     /// Get it in your [Twitter App Dashboard](https://developer.twitter.com/en/apps/)
-    pub fn access_token(self, access_token: &'a str) -> Self {
+    pub fn access_token(self, access_token: &str) -> Self {
         Self {
-            access_token: Some(access_token.clone()),
+            access_token: Some(access_token.to_owned()),
             ..self
         }
     }
 
     /// Add your `secret_access_token`<br/>  
     /// Get it in your [Twitter App Dashboard](https://developer.twitter.com/en/apps/)
-    pub fn secret_access_token(self, secret_access_token: &'a str) -> Self {
+    pub fn secret_access_token(self, secret_access_token: &str) -> Self {
         Self {
-            secret_access_token: Some(secret_access_token.clone()),
+            secret_access_token: Some(secret_access_token.to_owned()),
             ..self
         }
     }
@@ -88,13 +89,13 @@ impl<'a> TwitterBot<'a> {
         let header = oauthcli::OAuthAuthorizationHeaderBuilder::new(
             method,
             &url,
-            self.consumer_key.unwrap(),
-            self.consumer_secret_key.unwrap(),
+            self.consumer_key.as_ref().unwrap(),
+            self.consumer_secret_key.as_ref().unwrap(),
             oauthcli::SignatureMethod::HmacSha1,
         )
         .token(
-            self.access_token.unwrap(),
-            self.secret_access_token.unwrap(),
+            self.access_token.as_ref().unwrap(),
+            self.secret_access_token.as_ref().unwrap(),
         )
         .finish_for_twitter();
 
@@ -131,13 +132,13 @@ impl<'a> TwitterBot<'a> {
         let header = oauthcli::OAuthAuthorizationHeaderBuilder::new(
             "POST",
             &url::Url::parse("https://upload.twitter.com/1.1/media/upload.json")?,
-            self.consumer_key.unwrap(),
-            self.consumer_secret_key.unwrap(),
+            self.consumer_key.as_ref().unwrap(),
+            self.consumer_secret_key.as_ref().unwrap(),
             oauthcli::SignatureMethod::HmacSha1,
         )
         .token(
-            self.access_token.unwrap(),
-            self.secret_access_token.unwrap(),
+            self.access_token.as_ref().unwrap(),
+            self.secret_access_token.as_ref().unwrap(),
         )
         .finish_for_twitter();
 

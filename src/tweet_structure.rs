@@ -67,6 +67,9 @@ impl Tweet {
     pub fn user(&self) -> &User {
         &self.user
     }
+    pub fn content(&self) -> &str {
+        &self.text
+    }
 }
 
 impl User {
