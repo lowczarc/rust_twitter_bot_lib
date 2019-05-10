@@ -167,14 +167,14 @@ impl TwitterBot {
     pub fn tweet(
         &self,
         content: &str,
-        parameters: Option<HashMap<&str, &str>>,
+        params: Option<HashMap<&str, &str>>,
     ) -> Result<tweet_structure::Tweet, Box<Error>> {
         let mut request = url::Url::parse("https://api.twitter.com/1.1/statuses/update.json")?;
 
         {
             let mut query_pairs = request.query_pairs_mut();
             query_pairs.append_pair("status", content);
-            if let Some(pairs) = parameters {
+            if let Some(pairs) = params {
                 for (key, value) in pairs.iter() {
                     query_pairs.append_pair(key, value);
                 }
@@ -200,26 +200,21 @@ impl TwitterBot {
     pub fn get_tweets_query(
         &self,
         query: &str,
-        options: tweet_structure::QueryOption,
+        params: Option<HashMap<&str, &str>>,
     ) -> Result<Vec<tweet_structure::Tweet>, Box<Error>> {
         let mut request = url::Url::parse("https://api.twitter.com/1.1/search/tweets.json")?;
-        request.query_pairs_mut().append_pair("q", query);
-        request.query_pairs_mut().append_pair("count", "100");
-        if let Some(result_type) = options.result_type {
-            request
-                .query_pairs_mut()
-                .append_pair("result_type", &result_type);
+
+        {
+            let mut query_pairs = request.query_pairs_mut();
+            query_pairs.append_pair("q", query);
+            query_pairs.append_pair("count", "100");
+            if let Some(pairs) = params {
+                for (key, value) in pairs.iter() {
+                    query_pairs.append_pair(key, value);
+                }
+            }
         }
-        if let Some(max_id) = options.max_id {
-            request
-                .query_pairs_mut()
-                .append_pair("max_id", &max_id.to_string());
-        }
-        if let Some(since_id) = options.since_id {
-            request
-                .query_pairs_mut()
-                .append_pair("since_id", &since_id.to_string());
-        }
+
         let request = url::Url::parse(&request.to_string().replace("+", "%20"))?;
 
         let response: tweet_structure::SearchResponse = self.send_request(request, "GET")?;

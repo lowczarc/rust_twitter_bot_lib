@@ -103,10 +103,3 @@ impl TwitterError {
         &self.errors[0].message
     }
 }
-
-#[derive(Default)]
-pub struct QueryOption {
-    pub result_type: Option<String>,
-    pub since_id: Option<i64>,
-    pub max_id: Option<i64>,
-}
