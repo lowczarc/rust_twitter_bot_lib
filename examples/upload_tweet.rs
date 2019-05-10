@@ -1,5 +1,6 @@
+use std::{collections::HashMap, path::Path};
+
 use rust_twitter_bot_lib::*;
-use std::path::Path;
 
 fn main() {
     let example_bot = TwitterBot::new()
@@ -8,11 +9,15 @@ fn main() {
         .access_token(YOUR_ACCESS_TOKEN)
         .secret_access_token(YOUR_SECRET_ACCESS_TOKEN);
 
-    let media_id = example_bot
+    let mut params = HashMap::new();
+    let media_id: &str = &example_bot
         .upload_file(Path::new("examples/chess.png"))
-        .unwrap();
+        .unwrap()
+        .to_string();
+
+    params.insert("media_ids", media_id);
     let res = example_bot
-        .tweet("Je teste des trucs", Some(media_id))
+        .tweet("This tweet has an image", Some(params))
         .unwrap();
 
     println!("{:?}", res);

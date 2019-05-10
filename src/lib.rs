@@ -6,6 +6,7 @@ extern crate url;
 pub mod tweet_structure;
 
 use std::{
+    collections::HashMap,
     error::Error,
     fmt::{self, Display},
     path::Path,
@@ -166,15 +167,20 @@ impl TwitterBot {
     pub fn tweet(
         &self,
         content: &str,
-        media_id: Option<u64>,
+        parameters: Option<HashMap<&str, &str>>,
     ) -> Result<tweet_structure::Tweet, Box<Error>> {
         let mut request = url::Url::parse("https://api.twitter.com/1.1/statuses/update.json")?;
-        request.query_pairs_mut().append_pair("status", content);
-        if let Some(media_id) = media_id {
-            request
-                .query_pairs_mut()
-                .append_pair("media_ids", &media_id.to_string());
+
+        {
+            let mut query_pairs = request.query_pairs_mut();
+            query_pairs.append_pair("status", content);
+            if let Some(pairs) = parameters {
+                for (key, value) in pairs.iter() {
+                    query_pairs.append_pair(key, value);
+                }
+            }
         }
+
         let request = url::Url::parse(&request.to_string().replace("+", "%20"))?;
 
         Ok(self.send_request(request, "POST")?)
