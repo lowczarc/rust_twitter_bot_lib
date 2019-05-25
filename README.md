@@ -1,3 +1,5 @@
+[![](https://img.shields.io/crates/v/rust_twitter_bot_lib.svg)](https://crates.io/crates/rust_twitter_bot_lib)
+
 # Rust Twitter Bot Lib
 A Rust lib for creating Twitter Bot
 
