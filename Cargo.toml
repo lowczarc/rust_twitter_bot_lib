@@ -5,7 +5,7 @@ authors = ["Lancelot OWCZARCZAK <lowczarc@student.42.fr>"]
 edition = "2018"
 
 [dependencies]
-oauthcli = { git = "https://github.com/lowczarc/rust-oauthcli" }
+oauthcli = "1.0.4"
 url = "1.7.2"
 reqwest = "0.9.16"
 serde = { version = "1.0.90",  features = ["derive"] }
