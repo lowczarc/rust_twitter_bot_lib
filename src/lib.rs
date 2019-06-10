@@ -3,7 +3,7 @@ extern crate reqwest;
 extern crate serde;
 extern crate url;
 
-pub mod tweet_structure;
+mod tweet_structure;
 
 use std::{
     collections::HashMap,
@@ -11,6 +11,7 @@ use std::{
     fmt::{self, Display},
     path::Path,
 };
+pub use tweet_structure::{Tweet, User};
 
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
@@ -224,7 +225,7 @@ impl TwitterBot {
 }
 
 #[derive(Debug)]
-pub struct TwitterBotError(String);
+struct TwitterBotError(String);
 
 impl Display for TwitterBotError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
