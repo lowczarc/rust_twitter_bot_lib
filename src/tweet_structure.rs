@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// Struct provided by TwitterBot methods
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Tweet {
     id: i64,
@@ -19,6 +20,7 @@ pub struct Tweet {
     retweeted: bool,
 }
 
+/// Struct provided by TwitterBot methods
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
     id: i64,
