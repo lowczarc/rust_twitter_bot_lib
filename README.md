@@ -7,7 +7,7 @@ A Rust lib for creating Twitter Bot
 Add twitter_bot_rust in your project dependencies
 ```toml
 [dependencies]
-rust_twitter_bot_lib = "0.1.1"
+rust_twitter_bot_lib = "0.1.2"
 ```
 
 And Tweet 😄

@@ -1,6 +1,6 @@
 [package]
 name = "rust_twitter_bot_lib"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Lancelot OWCZARCZAK <lowczarc@student.42.fr>"]
 edition = "2018"
 description = "A Rust lib for Twitter Bot creation "
