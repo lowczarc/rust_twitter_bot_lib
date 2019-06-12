@@ -69,8 +69,17 @@ impl Tweet {
     pub fn user(&self) -> &User {
         &self.user
     }
+
     pub fn content(&self) -> &str {
         &self.text
+    }
+
+    pub fn retweet_count(&self) -> i64 {
+        self.retweet_count
+    }
+
+    pub fn favorite_count(&self) -> i64 {
+        self.favorite_count
     }
 }
 
