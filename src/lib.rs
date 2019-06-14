@@ -208,6 +208,58 @@ impl TwitterBot {
         Ok(self.send_request(request, "POST")?)
     }
 
+    /// Favorite a tweet<br/>  
+    /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
+    pub fn favorite(
+        &self,
+        tweet_id: i64,
+    ) -> Result<tweet_structure::Tweet, Box<Error>> {
+        let mut request = url::Url::parse("https://api.twitter.com/1.1/favorites/create.json")?;
+        {
+            let mut query_pairs = request.query_pairs_mut();
+            query_pairs.append_pair("id", &tweet_id.to_string());
+        }
+        
+        Ok(self.send_request(request, "POST")?)
+    }
+
+    /// Unfavorite a tweet<br/>  
+    /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
+    pub fn unfavorite(
+        &self,
+        tweet_id: i64,
+    ) -> Result<tweet_structure::Tweet, Box<Error>> {
+        let mut request = url::Url::parse("https://api.twitter.com/1.1/favorites/destroy.json")?;
+        {
+            let mut query_pairs = request.query_pairs_mut();
+            query_pairs.append_pair("id", &tweet_id.to_string());
+        }
+        
+        Ok(self.send_request(request, "POST")?)
+    }
+
+    /// Retweet a tweet<br/>  
+    /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
+    pub fn retweet(
+        &self,
+        tweet_id: i64,
+    ) -> Result<tweet_structure::Tweet, Box<Error>> {
+        let request = url::Url::parse(&format!("https://api.twitter.com/1.1/statuses/retweet/{}.json", tweet_id))?;
+        
+        Ok(self.send_request(request, "POST")?)
+    }
+
+    /// Retweet a tweet<br/>  
+    /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
+    pub fn unretweet(
+        &self,
+        tweet_id: i64,
+    ) -> Result<tweet_structure::Tweet, Box<Error>> {
+        let request = url::Url::parse(&format!("https://api.twitter.com/1.1/statuses/unretweet/{}.json", tweet_id))?;
+        
+        Ok(self.send_request(request, "POST")?)
+    }
+
     /// Get tweet with id = `tweet_id`<br/>  
     /// Will fail if `consumer_key`, `consumer_key`, `access_token` and `secret_access_token` are not set
     pub fn get_tweet(&self, tweet_id: &str) -> Result<tweet_structure::Tweet, Box<Error>> {
