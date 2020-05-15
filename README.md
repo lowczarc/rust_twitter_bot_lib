@@ -21,7 +21,7 @@ fn main() {
     .access_token(YOUR_ACCESS_TOKEN)
     .secret_access_token(YOUR_SECRET_ACCESS_TOKEN);
 
-  let res = example_bot.tweet("🐦 + 🦀 = 💙 #myfirstTweet").unwrap();
+  let res = example_bot.tweet("🐦 + 🦀 = 💙 #myfirstTweet", None).unwrap();
 
   println!("{:?}", res);
 }
